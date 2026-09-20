@@ -1,0 +1,9 @@
+{
+  "name": "pd",
+  "description": "Session-hygiene skills: end-of-session cleanup, post-merge worktree cleanup, and context-preserving clear.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Peter Drier"
+  },
+  "license": "MIT"
+}
