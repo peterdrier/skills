@@ -32,10 +32,12 @@ from pathlib import Path
 
 # $/MTok: fresh input, output, cache write, cache read (API list prices).
 # Re-check against https://www.anthropic.com/pricing if these look stale.
-AS_OF = "2026-09-20"
+AS_OF = "2026-09-22"
 RATES = {
+    "fable-5-1": (10, 50, 12.50, 0.25),  # must precede plain "fable"
     "fable": (10, 50, 12.50, 1.00),
     "mythos": (10, 50, 12.50, 1.00),
+    "opus-5-5": (4, 20, 5.00, 0.20),  # must precede plain "opus"
     "opus": (5, 25, 6.25, 0.50),
     "sonnet-5": (2, 10, 2.50, 0.20),  # must precede plain "sonnet"
     "sonnet": (3, 15, 3.75, 0.30),
@@ -86,6 +88,24 @@ def usage_records(path):
         u = msg.get("usage")
         if u:
             yield j.get("requestId"), j.get("timestamp"), msg.get("model"), u
+
+
+def turn_count(path):
+    """User prompts: user records that aren't tool results, meta, or slash-command echoes."""
+    n = 0
+    for line in open(path, encoding="utf-8", errors="ignore"):
+        try:
+            j = json.loads(line)
+        except ValueError:
+            continue
+        if j.get("type") != "user" or j.get("isMeta"):
+            continue
+        c = (j.get("message") or {}).get("content")
+        if isinstance(c, str):
+            n += not c.lstrip().startswith(("<command-", "<local-command-"))
+        elif isinstance(c, list):
+            n += any(b.get("type") != "tool_result" for b in c if isinstance(b, dict))
+    return n
 
 
 def dedup_last(records):
@@ -175,7 +195,7 @@ def duration_str(first, last):
     return f"{s}s"
 
 
-def build_row(label, tier, by_id):
+def build_row(label, tier, by_id, turns):
     by_model, first, last = usage_stats(by_id)
     tok = {"in": 0, "out": 0, "cw": 0, "cr": 0}
     usd = 0.0
@@ -190,6 +210,7 @@ def build_row(label, tier, by_id):
         "label": label,
         "tier": tier,
         "models": by_model,
+        "turns": turns,
         "requests": len(by_id),
         "tok": tok,
         "usd": usd,
@@ -224,19 +245,19 @@ def main():
     session_id = os.path.basename(transcript)[: -len(".jsonl")]
 
     main_by_id = dedup_last(usage_records(transcript))
-    rows = [build_row("main (orchestrator)", "-", main_by_id)]
+    rows = [build_row("main (orchestrator)", "-", main_by_id, turn_count(transcript))]
     for p in find_agent_files(transcript):
         by_id = dedup_last(usage_records(p))
         if not by_id:
             continue
         label = agent_label(p)
-        rows.append(build_row(label, tier_of(label), by_id))
+        rows.append(build_row(label, tier_of(label), by_id, turn_count(p)))
 
     ordered = [rows[0]] + sorted(rows[1:], key=lambda r: r["first"] or "")
 
     print(f"# Spend report: {session_id}\n")
-    print("| Agent | Tier | Model | Reqs | In | Out | Cache W | Cache R | Est $ | First-Last (dur) |")
-    print("|---|---|---|---|---|---|---|---|---|---|")
+    print("| Agent | Tier | Model | Turns | Reqs | In | Out | Cache W | Cache R | Est $ | First-Last (dur) |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|")
     total_tok = {"in": 0, "out": 0, "cw": 0, "cr": 0}
     total_usd = 0.0
     all_unpriced = set()
@@ -251,7 +272,7 @@ def main():
         )
         t = r["tok"]
         print(
-            f"| {r['label']} | {r['tier']} | {models} | {r['requests']} | {t['in']:,} | {t['out']:,} "
+            f"| {r['label']} | {r['tier']} | {models} | {r['turns']} | {r['requests']} | {t['in']:,} | {t['out']:,} "
             f"| {t['cw']:,} | {t['cr']:,} | ${r['usd']:.2f} | {span} |"
         )
         for k in total_tok:
@@ -260,7 +281,7 @@ def main():
         all_unpriced |= r["unpriced"]
         merge_model_rollup(model_rollup, r["models"])
     print(
-        f"| **TOTAL** | | | {sum(r['requests'] for r in ordered)} | {total_tok['in']:,} | {total_tok['out']:,} "
+        f"| **TOTAL** | | | {sum(r['turns'] for r in ordered)} | {sum(r['requests'] for r in ordered)} | {total_tok['in']:,} | {total_tok['out']:,} "
         f"| {total_tok['cw']:,} | {total_tok['cr']:,} | **${total_usd:.2f}** | |"
     )
     print()
@@ -287,6 +308,7 @@ def main():
                     "label": r["label"],
                     "tier": r["tier"],
                     "models": sorted(r["models"]),
+                    "turns": r["turns"],
                     "requests": r["requests"],
                     "tokens": r["tok"],
                     "usd": round(r["usd"], 6),

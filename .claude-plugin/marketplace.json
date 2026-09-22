@@ -8,7 +8,7 @@
       "name": "pd",
       "source": "./plugins/pd",
       "description": "Personal Claude Code skills: subagent orchestration with tiered worker agents, PR stewarding, session cost reports, pending-question roll-up, issue drafting, context-file hygiene, and session cleanup.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "license": "MIT"
     }
   ]
