@@ -1,7 +1,7 @@
 {
   "name": "pd-codex",
-  "version": "0.1.0",
-  "description": "Cost-conscious orchestration with focused Codex subagents.",
+  "version": "0.2.0",
+  "description": "Cost-conscious orchestration and per-agent session spend estimates for Codex.",
   "author": {
     "name": "Peter Drier"
   },
@@ -10,8 +10,8 @@
   "license": "MIT",
   "interface": {
     "displayName": "PD Codex",
-    "shortDescription": "Plan centrally, delegate focused work to cheaper models.",
-    "longDescription": "Keep planning, architecture, integration, and final review with the main agent. Route bounded work to suitable workers with concise briefs and reports.",
+    "shortDescription": "Delegate focused work and estimate session spend.",
+    "longDescription": "Keep planning, architecture, integration, and final review with the main agent. Route bounded work to suitable workers and estimate per-agent session spend from local records.",
     "developerName": "Peter Drier",
     "category": "Productivity",
     "capabilities": [],

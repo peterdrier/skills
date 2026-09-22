@@ -25,15 +25,22 @@ and final review in the main thread; delegate bounded work to cheaper workers.
 ```
 
 Use a capable main model, such as GPT-6 Astra. The bundled routing preferences
-are Sol at medium reasoning for implementation, Luna at low reasoning for
-mechanical work, and Astra for difficult judgment. The skill explicitly selects
-worker models; it does not require changes to your global Codex configuration.
+are GPT-6 Sol at medium reasoning for implementation, GPT-6 Luna at low reasoning
+for mechanical work, and GPT-6 Astra for difficult judgment. GPT-5.6 Luna,
+Terra, and Sol are fallback options when a preferred worker is unavailable. The
+skill explicitly selects worker models; it does not require changes to your
+global Codex configuration.
 You can override those preferences in your request. Available models and native
 subagent support depend on your Codex client and account; substitutions are
 reported. Without delegation tools, the skill reports that limitation and works
 locally.
 
-The skill follows the target project's rules for worktrees, validation, and
+`pd-codex` also provides `spend` for a rough per-agent cost report from local
+Codex session records. Ask for the session's spend or select the skill directly.
+It shows each agent's model and reasoning level, turns, and estimated Standard
+API list-price equivalent; it does not report a Codex subscription charge.
+
+The `orch` skill follows the target project's rules for worktrees, validation, and
 publishing. It has no project-specific paths, other skill dependencies, hooks,
 MCP servers, or credentials. Delegation adds overhead: batching work and limiting
 expensive-model context can reduce cost, but savings are not guaranteed.

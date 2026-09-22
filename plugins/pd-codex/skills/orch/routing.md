@@ -4,9 +4,11 @@ Choose a model for the judgment the task requires and a reasoning effort for its
 
 | Model | Default effort | Route here |
 | --- | --- | --- |
-| `gpt-5.6-luna` | low | Straightforward searches, inventories, log summaries, mechanical edits with exact instructions, and command-based checks |
-| `gpt-5.6-sol` | medium | Bounded implementation, investigation, debugging, tests, documentation, and most repository work |
+| `gpt-6-luna` | low | Straightforward searches, inventories, log summaries, mechanical edits with exact instructions, and command-based checks |
+| `gpt-6-sol` | medium | Bounded implementation, investigation, debugging, tests, documentation, and most repository work |
 | `gpt-6-astra` | high | Difficult architecture, subtle root-cause analysis, security-sensitive judgment, integration decisions, and adversarial review |
+
+When a preferred GPT-6 worker is unavailable, choose by task and available models: `gpt-5.6-luna` at low effort for mechanical work, `gpt-5.6-terra` at medium effort for routine bounded work, or `gpt-5.6-sol` at medium effort when that work needs stronger coding judgment. For difficult work, keep the primary Astra agent responsible for the decision; use an available strong worker only if a separate investigation is useful. These are fallback routes, not claims that models in different families perform identically.
 
 Use low effort when the brief fully specifies the action, medium when the worker must determine a bounded approach, and high or above only when ambiguity or the cost of a missed issue warrants it. The primary strong model retains planning, architecture, integration, and final review even when an Astra worker advises on a difficult question.
 
