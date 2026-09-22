@@ -44,8 +44,17 @@ compatibility and presentation. See the [plugin packaging documentation](https:/
 
 ## Claude Code
 
-`pd` contains three session-hygiene skills:
+`pd` contains:
 
+- `/pd:orch` — orchestrate multi-part work by delegating to cheaper subagents with an
+  explicit model/effort tier per task; ships the `orch-*` worker agents (haiku, sonnet and
+  opus at low/medium/high, fable-high) and the routing rule other skills point to
+- `/pd:spend` — after-the-fact cost report for a session: tokens and dollars per agent
+- `/pd:ask` — roll up everything a session is waiting on the user to answer, readable cold
+- `/pd:create-issue` — draft and submit a GitHub issue; a project can add its own label
+  and body conventions in `.claude/create-issue.md`
+- `/pd:context-cleanup` — audit and restructure a project's CLAUDE.md, `.claude/`, memory
+  and skills for efficient context use
 - `/pd:finish` — end-of-session cleanup (git hygiene, context capture, loose ends)
 - `/pd:merged` — post-merge git worktree cleanup with a CLEAN/STOP verdict banner
 - `/pd:cls` — context-preserving clear: generates a continuation prompt before `/clear`
