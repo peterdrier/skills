@@ -100,8 +100,8 @@ On every wake:
    or the worker's own replies, successful check suites, a review wrapper with no
    comments, an event on a head the worker has already superseded.
 3. Actionable: dispatch **one** worker per the brief in
-   [`round-worker.md`](round-worker.md), `orch-opus-medium` (`pd:orch-opus-medium` when
-   only the plugin's copy exists), and end the turn. A review finding, CI failure, merge
+   [`round-worker.md`](round-worker.md), `pd:orch-opus-medium` (a project's own
+   `orch-opus-medium` if it ships one), and end the turn. A review finding, CI failure, merge
    conflict or change the user asked for gets the round worker; a **question** from the
    user gets that brief marked `Answer only: no triage, no edit, no commit`: it answers
    in a reply and touches nothing. Never two workers on one PR at once, and one wake often
