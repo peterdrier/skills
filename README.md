@@ -44,8 +44,17 @@ compatibility and presentation. See the [plugin packaging documentation](https:/
 
 ## Claude Code
 
-`pd` contains three session-hygiene skills:
+`pd` contains:
 
+- `/pd:orch` — orchestrate multi-part work by delegating to cheaper subagents with an
+  explicit model/effort tier per task; ships the `orch-*` worker agents (haiku, sonnet and
+  opus at low/medium/high, fable-high) and the routing rule other skills point to
+- `/pd:spend` — after-the-fact cost report for a session: tokens and dollars per agent
+- `/pd:ask` — roll up everything a session is waiting on the user to answer, readable cold
+- `/pd:create-issue` — draft and submit a GitHub issue; a project can add its own label
+  and body conventions in `.claude/create-issue.md`
+- `/pd:context-cleanup` — audit and restructure a project's CLAUDE.md, `.claude/`, memory
+  and skills for efficient context use
 - `/pd:finish` — end-of-session cleanup (git hygiene, context capture, loose ends)
 - `/pd:merged` — post-merge git worktree cleanup with a CLEAN/STOP verdict banner
 - `/pd:cls` — context-preserving clear: generates a continuation prompt before `/clear`
@@ -59,19 +68,17 @@ compatibility and presentation. See the [plugin packaging documentation](https:/
 
 ### Cloud sessions
 
-Add to project `.claude/settings.json`:
+Cloud sessions (claude.ai/code) ignore a repository's `enabledPlugins` and
+`extraKnownMarketplaces`. Enable `pd` on your claude.ai account instead, and cloud
+sessions load it as a synced plugin. A project may still list the marketplace in its
+`.claude/settings.json` so local sessions on a fresh machine pick it up:
 
 ```json
 {
-  "extraKnownMarketplaces": [
-    {
-      "name": "peterdrier",
-      "url": "https://raw.githubusercontent.com/peterdrier/skills/main/.claude-plugin/marketplace.json"
-    }
-  ],
-  "enabledPlugins": {
-    "pd@peterdrier": true
-  }
+  "extraKnownMarketplaces": {
+    "peterdrier": { "source": { "source": "github", "repo": "peterdrier/skills" } }
+  },
+  "enabledPlugins": { "pd@peterdrier": true }
 }
 ```
 

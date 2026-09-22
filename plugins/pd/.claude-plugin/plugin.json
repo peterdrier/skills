@@ -1,7 +1,7 @@
 {
   "name": "pd",
-  "description": "Session-hygiene skills: end-of-session cleanup, post-merge worktree cleanup, and context-preserving clear.",
-  "version": "0.1.0",
+  "description": "Personal Claude Code skills: subagent orchestration with tiered worker agents, session cost reports, pending-question roll-up, issue drafting, context-file hygiene, and session cleanup.",
+  "version": "0.2.0",
   "author": {
     "name": "Peter Drier"
   },
