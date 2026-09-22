@@ -410,7 +410,13 @@ def _compact_int(value: int) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("session", nargs="?", help="root session ID/prefix or rollout JSONL path")
+    current_session = os.environ.get("CODEX_THREAD_ID") or os.environ.get("CODEX_SESSION_ID")
+    parser.add_argument(
+        "session",
+        nargs="?",
+        default=current_session,
+        help="root session ID/prefix or rollout JSONL path (default: current Codex thread when available)",
+    )
     parser.add_argument("--cwd", type=Path, default=Path.cwd(), help="workspace used to select the latest root")
     parser.add_argument(
         "--sessions-dir",

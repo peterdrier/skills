@@ -11,7 +11,7 @@ Run the adjacent `scripts/spend.py` with Python from the project directory:
 python <path-to-this-skill>/scripts/spend.py [<session-id> | <rollout-path>] [--log]
 ```
 
-With no argument, the script selects the latest root session for the current working directory. An explicit session ID or rollout path is useful when several sessions share a project. It follows session metadata to include linked subagents, including nested ones.
+With no argument, the script uses `CODEX_THREAD_ID` (or `CODEX_SESSION_ID`) to select the active Codex thread when available, then follows its parent links to include the root and linked subagents. If neither variable is available, it falls back to the latest root session for the current working directory. Pass an explicit session ID or rollout path when reporting a different session.
 
 Show the script's report, which puts model and reasoning level, turns, and estimated cost first. Briefly explain any missing usage, unknown models, or incomplete agent linkage that the report flags. Do not read full rollout files into model context; the script streams them and prints only the summary. If the script cannot identify the intended session, ask for its session ID or path.
 
