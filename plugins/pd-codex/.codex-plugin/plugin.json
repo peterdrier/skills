@@ -1,0 +1,20 @@
+{
+  "name": "pd-codex",
+  "version": "0.1.0",
+  "description": "Cost-conscious orchestration with focused Codex subagents.",
+  "author": {
+    "name": "Peter Drier"
+  },
+  "skills": "./skills/",
+  "repository": "https://github.com/peterdrier/skills",
+  "license": "MIT",
+  "interface": {
+    "displayName": "PD Codex",
+    "shortDescription": "Plan centrally, delegate focused work to cheaper models.",
+    "longDescription": "Keep planning, architecture, integration, and final review with the main agent. Route bounded work to suitable workers with concise briefs and reports.",
+    "developerName": "Peter Drier",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Use orch to split this task and delegate focused work to cheaper models."
+  }
+}

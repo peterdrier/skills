@@ -1,0 +1,12 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "pd-codex",
+  "version": "0.1.0",
+  "description": "Cost-conscious orchestration with focused Codex subagents.",
+  "author": {
+    "name": "Peter Drier"
+  },
+  "repository": "https://github.com/peterdrier/skills",
+  "license": "MIT",
+  "keywords": ["codex", "orchestration", "subagents"]
+}
