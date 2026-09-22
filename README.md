@@ -68,19 +68,17 @@ compatibility and presentation. See the [plugin packaging documentation](https:/
 
 ### Cloud sessions
 
-Add to project `.claude/settings.json`:
+Cloud sessions (claude.ai/code) ignore a repository's `enabledPlugins` and
+`extraKnownMarketplaces`. Enable `pd` on your claude.ai account instead, and cloud
+sessions load it as a synced plugin. A project may still list the marketplace in its
+`.claude/settings.json` so local sessions on a fresh machine pick it up:
 
 ```json
 {
-  "extraKnownMarketplaces": [
-    {
-      "name": "peterdrier",
-      "url": "https://raw.githubusercontent.com/peterdrier/skills/main/.claude-plugin/marketplace.json"
-    }
-  ],
-  "enabledPlugins": {
-    "pd@peterdrier": true
-  }
+  "extraKnownMarketplaces": {
+    "peterdrier": { "source": { "source": "github", "repo": "peterdrier/skills" } }
+  },
+  "enabledPlugins": { "pd@peterdrier": true }
 }
 ```
 
