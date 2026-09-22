@@ -1,6 +1,6 @@
 ---
 name: orch
-description: Orchestrate multi-part work from the main thread by delegating nearly all of it to cheaper subagents (haiku / sonnet / opus at low / medium / high effort) with an explicit tier chosen per task, keeping the main context small enough that it never compacts. Use whenever the user says "/orch", "orchestrate", "fan this out", "farm this out", "use subagents for this", or hands over a job with several separable parts (build X, fix these N things, audit then fix) — especially when the session runs an expensive model. Also the home of the shared subagent routing rule (routing.md) that other skills point to. Not for PR tending or sprint execution, which have their own skills.
+description: Orchestrate multi-part work from the main thread by delegating nearly all of it to cheaper subagents (haiku / sonnet / opus at low / medium / high effort) with an explicit tier chosen per task, keeping the main context small enough that it never compacts. Use whenever the user says "/orch", "orchestrate", "fan this out", "farm this out", "use subagents for this", or hands over a job with several separable parts (build X, fix these N things, audit then fix) — especially when the session runs an expensive model. Also the home of the shared subagent routing rule (routing.md) that other skills point to. Not for PR tending (pd:steward, which this skill hands off to) or sprint execution.
 ---
 
 # orch
@@ -43,8 +43,10 @@ recover from.
    runs the check and returns pass/fail plus failing names. Workers grading themselves echo what
    they expected to see.
 5. **Report** to the user one line per task. Don't relay worker reports.
-6. **Hand off.** If the project defines how a pushed PR is tended (a steward skill or similar),
-   follow it and stop. Never tend the PR from this context: every wake re-reads all of it.
+6. **Hand off.** Once the PR is pushed and ready for review, load the `pd:steward` skill and
+   do its hand-off: spawn a fresh steward session, wait for it to confirm its subscription,
+   unsubscribe, report the PR and steward in one line, and stop. Never tend the PR from this
+   context: every wake re-reads all of it.
 
 ## Briefs
 

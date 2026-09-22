@@ -49,6 +49,10 @@ compatibility and presentation. See the [plugin packaging documentation](https:/
 - `/pd:orch` — orchestrate multi-part work by delegating to cheaper subagents with an
   explicit model/effort tier per task; ships the `orch-*` worker agents (haiku, sonnet and
   opus at low/medium/high, fable-high) and the routing rule other skills point to
+- `/pd:steward` — tending a PR after ready-for-review: the builder hands it to a thin
+  steward session that classifies each event and dispatches one round worker, under a
+  five-round review ceiling; a project adds its verification gate and triage rules in
+  `.claude/steward.md`. Needs the Claude Code Remote tools
 - `/pd:spend` — after-the-fact cost report for a session: tokens and dollars per agent
 - `/pd:ask` — roll up everything a session is waiting on the user to answer, readable cold
 - `/pd:create-issue` — draft and submit a GitHub issue; a project can add its own label
