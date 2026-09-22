@@ -117,6 +117,8 @@ def parse_rollout(path: Path) -> Rollout | None:
     meta: dict[str, Any] | None = None
     contexts: dict[str, tuple[str, str]] = {}
     current_context = ("unknown", "unknown", "")
+    completed_turns: dict[tuple[str, str], set[str]] = defaultdict(set)
+    unclassified_completed_turns: set[str] = set()
     response_usage: list[tuple[str, str, str, Usage]] = []
     last_cumulative: Usage | None = None
     malformed = 0
@@ -137,6 +139,16 @@ def parse_rollout(path: Path) -> Rollout | None:
             effort = str(payload.get("effort") or "unknown")
             contexts[turn_id] = (model, effort)
             current_context = (model, effort, turn_id)
+        elif row_type == "event_msg" and payload.get("type") == "task_complete":
+            # A rollout can reuse one turn_context across multiple completed tasks.
+            # Count task completion events as turns, while retaining context IDs
+            # below for a currently active task with no completion event yet.
+            turn_id = str(payload.get("turn_id") or current_context[2] or "unknown")
+            model, effort = contexts.get(turn_id, current_context[:2])
+            if model == "unknown":
+                unclassified_completed_turns.add(turn_id)
+            else:
+                completed_turns[(model, effort)].add(turn_id)
         elif row_type == "token_usage_record":
             turn_id = str(payload.get("turn_id") or current_context[2] or "unknown")
             model, effort = contexts.get(turn_id, current_context[:2])
@@ -149,7 +161,16 @@ def parse_rollout(path: Path) -> Rollout | None:
     if not meta:
         return None
 
+    # Some rollouts omit turn_context for continued tasks. If the rollout used
+    # just one model/effort, those completions still have an unambiguous bucket.
+    known_contexts = set(contexts.values())
+    if len(known_contexts) == 1:
+        completed_turns[next(iter(known_contexts))].update(unclassified_completed_turns)
+
     buckets: dict[tuple[str, str], Bucket] = {}
+    for (model, effort), turn_ids in completed_turns.items():
+        bucket = buckets.setdefault((model, effort), Bucket(model=model, effort=effort))
+        bucket.turns.update(turn_ids)
     if response_usage:
         for model, effort, turn_id, usage in response_usage:
             key = (model, effort)
@@ -161,7 +182,8 @@ def parse_rollout(path: Path) -> Rollout | None:
         for turn_id, (model, effort) in contexts.items():
             key = (model, effort)
             bucket = buckets.setdefault(key, Bucket(model=model, effort=effort))
-            bucket.turns.add(turn_id)
+            if turn_id not in completed_turns.get(key, set()):
+                bucket.turns.add(turn_id)
     elif last_cumulative:
         distinct_models = {model for model, _ in contexts.values()}
         distinct_efforts = {effort for _, effort in contexts.values()}
@@ -176,7 +198,8 @@ def parse_rollout(path: Path) -> Rollout | None:
         for turn_id, (model, effort) in contexts.items():
             key = (model, effort)
             bucket = buckets.setdefault(key, Bucket(model=model, effort=effort))
-            bucket.turns.add(turn_id)
+            if turn_id not in completed_turns.get(key, set()):
+                bucket.turns.add(turn_id)
 
     thread_id = str(meta.get("id") or meta.get("session_id") or path.stem)
     session_id = str(meta.get("session_id") or thread_id)
