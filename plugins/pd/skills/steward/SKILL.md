@@ -43,8 +43,11 @@ When the deliverable is pushed and the PR is ready for review:
    - `model`: the current sonnet (e.g. `claude-sonnet-5`): classify-and-dispatch needs no
      judgement; the judgement lives in the round worker.
    - `title`: `steward: <owner>/<repo>#<N>` · `tags`: `["steward"]`.
-   - `source_url` / `source_revision`: the repo and the PR's branch, so the worker it
-     dispatches has a checkout.
+   - `source_url` / `source_revision`: the repo and the PR's branch. Mandatory: a child
+     session inherits the environment but not the parent's repositories, so without a
+     source it has no repo and `subscribe_pr_activity` fails with "this session has no
+     repositories configured" (peterdrier/Humans#1816, 2026-09-23). The checkout the round
+     worker needs comes from the same field.
    - `prompt`: the brief below, filled in. Nothing else: no history, no ledger.
 2. Stay subscribed until the steward is. Wait for its first turn to finish (`get_session`
    on the new session) and confirm from its reply that `subscribe_pr_activity` succeeded.
