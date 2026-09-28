@@ -68,6 +68,8 @@ compatibility and presentation. See the [plugin packaging documentation](https:/
   and skills for efficient context use
 - `/pd:finish` — end-of-session cleanup (git hygiene, context capture, loose ends)
 - `/pd:merged` — post-merge git worktree cleanup with a CLEAN/STOP verdict banner
+- `/pd:cleanup` — sweep every worktree and stale local branch in a repo: one survey, one
+  table, one bulk question, safe removal, CLEAN/STOP banner
 - `/pd:cls` — context-preserving clear: generates a continuation prompt before `/clear`
 
 ### Install
