@@ -19,9 +19,12 @@ from typing import Any, Iterable
 # Verified 2026-09-23 against:
 # https://developers.openai.com/api/docs/pricing
 # https://developers.openai.com/api/docs/models/compare
-PRICE_AS_OF = "2026-09-23"
+# GPT-6.1 Sol verified 2026-09-30 against:
+# https://developers.openai.com/api/docs/models/gpt-6.1-sol
+PRICE_AS_OF = "2026-09-23 (GPT-6.1 Sol: 2026-09-30)"
 PRICES: dict[str, tuple[Decimal, Decimal, Decimal]] = {
     "gpt-6-astra": (Decimal("10"), Decimal("1"), Decimal("50")),
+    "gpt-6.1-sol": (Decimal("2"), Decimal("0.1"), Decimal("10")),
     "gpt-6-sol": (Decimal("2"), Decimal("0.2"), Decimal("10")),
     "gpt-6-luna": (Decimal("0.1"), Decimal("0.01"), Decimal("0.5")),
     "gpt-5.6-sol": (Decimal("4"), Decimal("0.4"), Decimal("20")),
