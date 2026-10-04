@@ -365,7 +365,7 @@ def render_report(root: Rollout, tree: list[Rollout]) -> str:
     for agent in tree:
         malformed += agent.malformed_lines
         if not agent.buckets:
-            rows.append([agent.label, "unknown", "unknown", "0", "$0.0000", "0", "0/0/0/0", "waiting"])
+            rows.append([agent.label, "unknown", "unknown", "0", "0", "$0.0000", "0", "0/0/0/0", "waiting"])
             continue
         for bucket in agent.buckets.values():
             total_usage.add(bucket.usage)
@@ -384,6 +384,7 @@ def render_report(root: Rollout, tree: list[Rollout]) -> str:
                 bucket.model,
                 bucket.effort,
                 str(len(bucket.turns)),
+                "unknown" if bucket.fallback else str(bucket.responses),
                 cost_text,
                 _compact_int(bucket.usage.total_tokens),
                 "/".join(_compact_int(value) for value in (
@@ -395,7 +396,7 @@ def render_report(root: Rollout, tree: list[Rollout]) -> str:
                 note,
             ])
 
-    headers = ["Agent", "Model", "Level", "Turns", "Est. cost", "Tokens", "In/cache/write/out", "Note"]
+    headers = ["Agent", "Model", "Level", "Task turns", "Responses", "Est. cost", "Tokens", "In/cache/write/out", "Note"]
     widths = [max(len(headers[i]), *(len(row[i]) for row in rows)) for i in range(len(headers))]
     table = ["  ".join(headers[i].ljust(widths[i]) for i in range(len(headers)))]
     table.append("  ".join("-" * width for width in widths))
@@ -407,11 +408,14 @@ def render_report(root: Rollout, tree: list[Rollout]) -> str:
         "",
         *table,
         "",
-        f"Agents: {len(tree)}    Tokens: {_compact_int(total_usage.total_tokens)}    Estimated priced total: ${total_cost:.4f}",
+        f"Agents: {len(tree)}    Responses: {sum(bucket.responses for agent in tree for bucket in agent.buckets.values())}"
+        f"{' (recorded only)' if fallbacks else ''}    Tokens: {_compact_int(total_usage.total_tokens)}    Estimated priced total: ${total_cost:.4f}",
     ]
     if unpriced:
         lines.append("Unpriced models (excluded from total): " + ", ".join(sorted(unpriced)))
     caveats = [
+        "Task turns are outer agent tasks; each can contain many model responses and tool calls.",
+        "Responses count per-response usage records; costs sum those records independently of task-turn count.",
         f"API-equivalent estimate using Standard list rates checked {PRICE_AS_OF}; rates can change and subscription billing may differ.",
         "Cached input is priced separately; visible cache writes use 1.25x the input rate.",
         "Reasoning tokens are included in output_tokens and are not charged twice.",
