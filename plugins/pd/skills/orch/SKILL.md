@@ -29,7 +29,7 @@ recover from.
 ## Loop
 
 1. **Split** the job into independent tasks, each with a goal, a scope (paths), and a check a
-   worker can run. Need facts to split well? Send a haiku scout — don't explore yourself.
+   worker can run. Need facts to split well? Send a haiku-low scout — don't explore yourself.
 2. **Ledger.** Write `<scratchpad>/orch-<slug>.md`, one line per task:
    `id · tier · agent name · status · result pointer`. Update it on every dispatch and return.
    After a compaction or resume, re-read it before anything else — it is the state; your memory
@@ -39,9 +39,9 @@ recover from.
    re-reads its whole accumulated context at its rate, so a grown agent is the *expensive*
    option for something small. Cheap-looking reuse is the trap: a `cp`, a one-line edit, a short
    git sequence are yours, not a worker's.
-4. **Verify** claims (tests pass, bug gone) with a separate haiku worker in a clean context that
-   runs the check and returns pass/fail plus failing names. Workers grading themselves echo what
-   they expected to see.
+4. **Verify** claims (tests pass, bug gone) with a separate haiku-medium worker in a clean context
+   that runs the check and returns pass/fail plus failing names (not haiku-low: it skips checks).
+   Workers grading themselves echo what they expected to see.
 5. **Report** to the user one line per task. Don't relay worker reports.
 6. **Hand off.** Once the PR is pushed and ready for review, load the `pd:steward` skill and
    do its hand-off: spawn a fresh steward session, wait for it to confirm its subscription,
