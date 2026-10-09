@@ -39,6 +39,7 @@ RATES = {
     "mythos": (10, 50, 12.50, 1.00),
     "opus-5-5": (4, 20, 5.00, 0.20),  # must precede plain "opus"
     "opus": (5, 25, 6.25, 0.50),
+    "sonnet-5-5": (2, 10, 2.50, 0.10),  # must precede "sonnet-5"
     "sonnet-5": (2, 10, 2.50, 0.20),  # must precede plain "sonnet"
     "sonnet": (3, 15, 3.75, 0.30),
     "haiku-5-5": (0.10, 0.50, 0.125, 0.01),  # must precede plain "haiku"; ≤100k prompt
