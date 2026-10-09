@@ -32,22 +32,28 @@ from pathlib import Path
 
 # $/MTok: fresh input, output, cache write, cache read (API list prices).
 # Re-check against https://www.anthropic.com/pricing if these look stale.
-AS_OF = "2026-09-22"
+AS_OF = "2026-10-07"
 RATES = {
     "fable-5-1": (10, 50, 12.50, 0.25),  # must precede plain "fable"
     "fable": (10, 50, 12.50, 1.00),
     "mythos": (10, 50, 12.50, 1.00),
     "opus-5-5": (4, 20, 5.00, 0.20),  # must precede plain "opus"
     "opus": (5, 25, 6.25, 0.50),
+    "sonnet-5-5": (2, 10, 2.50, 0.10),  # must precede "sonnet-5"
     "sonnet-5": (2, 10, 2.50, 0.20),  # must precede plain "sonnet"
     "sonnet": (3, 15, 3.75, 0.30),
+    "haiku-5-5": (0.10, 0.50, 0.125, 0.01),  # must precede plain "haiku"; ≤100k prompt
     "haiku": (1, 5, 1.25, 0.10),
 }
+# Haiku 5.5 bills every token at 5× once the request's prompt (input + cache) exceeds 100k.
+HAIKU_5_5_LONG = (0.50, 2.50, 0.625, 0.05)
 
 TIER_RE = re.compile(r"-(haiku|sonnet|opus|fable)(-(low|medium|high))?$")
 
 
-def rate_for(model):
+def rate_for(model, prompt_tokens=0):
+    if "haiku-5-5" in (model or "") and prompt_tokens > 100_000:
+        return HAIKU_5_5_LONG
     for key, r in RATES.items():
         if key in (model or ""):
             return r
@@ -134,7 +140,7 @@ def usage_stats(by_id):
         b["cw"] += cw
         b["cr"] += cr
         b["requests"] += 1
-        r = rate_for(model)
+        r = rate_for(model, i + cw + cr)
         if r is None:
             b["priced"] = False
         else:
