@@ -5,6 +5,7 @@
 | column | meaning |
 |---|---|
 | `ref` | branch name, or `detached:<sha>` |
+| `size_gb` | `du -sk` of the worktree folder, in GB (ignored build output included, which is why it's there) |
 | `dirty` | lines of `git status --porcelain` (an untracked dir counts once) |
 | `ahead` | commits on the tip that aren't on `origin/main` (or `origin/HEAD`) |
 | `remote` | branch: `yes`/`no` = `origin/<branch>` exists after prune. Detached: `reachable` = some ref contains the commit (`git for-each-ref --contains`), `orphan` = none does |
