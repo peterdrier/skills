@@ -1,6 +1,7 @@
 ---
 name: cls
-description: Context-preserving clear. Use when the user says /cls or "clear and continue". Generates a continuation prompt that captures everything a fresh session needs to seamlessly pick up where this one left off.
+description: 'Context-preserving clear: write a continuation prompt a fresh session can pick up from.'
+when_to_use: Use on /cls or "clear and continue".
 ---
 
 # Context-Preserving Clear

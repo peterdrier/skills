@@ -1,6 +1,7 @@
 ---
 name: context-cleanup
-description: "Audit and restructure a project's Claude Code context files (CLAUDE.md, .claude/, memory/, skills) for intentional, efficient use of the context window. Use when context feels bloated, disorganized, or stale -- or periodically as hygiene. Produces a report first, then restructures with approval."
+description: Audit and restructure a project's Claude Code context files (CLAUDE.md, .claude/, memory, skills) for efficient use of the context window.
+when_to_use: Use when context feels bloated, disorganized, or stale, or as periodic hygiene. Reports first, restructures with approval.
 ---
 
 # Context Cleanup

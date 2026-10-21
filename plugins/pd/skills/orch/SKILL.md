@@ -1,6 +1,7 @@
 ---
 name: orch
-description: Orchestrate multi-part work from the main thread by delegating nearly all of it to cheaper subagents (haiku / sonnet / opus at low / medium / high effort) with an explicit tier chosen per task, keeping the main context small enough that it never compacts. Use whenever the user says "/orch", "orchestrate", "fan this out", "farm this out", "use subagents for this", or hands over a job with several separable parts (build X, fix these N things, audit then fix) — especially when the session runs an expensive model. Also the home of the shared subagent routing rule (routing.md) that other skills point to. Not for PR tending (pd:steward, which this skill hands off to) or sprint execution.
+description: Orchestrate multi-part work by delegating nearly all of it to cheaper subagents, with a model and effort tier chosen per task, so the main context never compacts.
+when_to_use: Use on /orch, "orchestrate", "fan this out", "farm this out", "use subagents for this", or any job with several separable parts. Not for PR tending (pd:steward).
 ---
 
 # orch

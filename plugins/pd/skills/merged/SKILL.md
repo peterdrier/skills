@@ -1,6 +1,7 @@
 ---
 name: merged
-description: Post-merge cleanup and session-close gate for a feature branch whose PR just merged. Use when the user says /merged, "the PR merged, clean it up", "merged cleanup", "clean up the worktree", or any time a PR has landed and its leftover git worktree + local branch need removing. Confirms the PR is actually MERGED, removes its worktree the right way (git worktree remove — never a recursive force-delete), deletes the squash-merged local branch, fast-forwards main, then ends with one of two unmistakable banners: CLEAN (everything cleaned and nothing else from the session is outstanding — safe to close) or STOP (a safety gate halted cleanup, or other session work is still pending — a numbered to-do list follows the banner immediately).
+description: 'Post-merge cleanup for a feature branch whose PR just merged: confirm it merged, remove the worktree through git, delete the local branch, fast-forward main, end with a CLEAN or STOP verdict.'
+when_to_use: Use on /merged, "the PR merged, clean it up", or "clean up the worktree".
 ---
 
 # Merged — Post-Merge Worktree Cleanup

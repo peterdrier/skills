@@ -1,6 +1,7 @@
 ---
 name: steward
-description: How a pushed PR is tended after ready-for-review. The builder hands the PR to a fresh, thin steward session and stops; the steward only classifies each wake and dispatches one round worker, and never does the work itself. Use at hand-off time (the last step of /pd:orch), when a session is briefed as a PR's steward, and before acting on any CI or review event on a PR you opened. Needs the Claude Code Remote tools (create_session, subscribe_pr_activity); without them, the fallback below.
+description: 'Tend a pushed PR after ready-for-review: a thin steward session classifies each CI or review wake and dispatches one round worker, never doing the work itself.'
+when_to_use: Use only at hand-off time (the last step of /pd:orch) or when this session is briefed as a PR's steward. Needs the Claude Code Remote tools.
 ---
 
 # steward
