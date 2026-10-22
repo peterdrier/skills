@@ -1,6 +1,7 @@
 ---
 name: ask
-description: Surface everything this session is waiting on the user to answer or decide, with enough context to answer cold — without reading the session. Use whenever the user says "/ask", "ask", "what do you need from me", "what are you waiting on", "any questions for me", "catch me up", or returns to a long-running session after being away. Presume the user has NOT read this conversation, even if they were present earlier.
+description: Roll up everything this session is waiting on the user to answer or decide, written so they can answer without having read the session.
+when_to_use: Use on /ask, "what do you need from me", "what are you waiting on", "catch me up", or when the user returns to a long-running session after being away.
 ---
 
 # Ask

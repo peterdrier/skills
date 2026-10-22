@@ -1,6 +1,7 @@
 ---
 name: spend
-description: After-the-fact cost report for a finished or running Claude Code session — tokens and estimated dollars per agent, parsed from transcripts. Use when the user says "/spend", "what did that cost", "cost breakdown", "where did the tokens go", or at the end of an orchestrated run. Not the built-in /cost total (that's live-session only, no per-agent breakdown).
+description: 'After-the-fact cost report for a Claude Code session: tokens and estimated dollars per agent, parsed from transcripts.'
+when_to_use: Use on /spend, "what did that cost", "cost breakdown", "where did the tokens go", or after an orchestrated run. Unlike the built-in /cost, it breaks down per agent.
 ---
 
 # spend

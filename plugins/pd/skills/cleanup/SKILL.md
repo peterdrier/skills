@@ -1,6 +1,7 @@
 ---
 name: cleanup
-description: Sweep ALL git worktrees and stale local branches and remove the dead ones safely — merged PRs, detached heads already reachable elsewhere, work that landed under another PR, branches deleted on origin. Works in one repo, or scans every repo under a folder or drive root. Use when the user says "clean up worktrees", "cleanup", "/cleanup", "prune worktrees", "what worktrees can go", "delete merged branches", when worktrees have piled up across sessions, or when the drive is full / out of disk space (emergency mode: known-safe worktrees go without confirmation). Leads with "Safe to remove: N worktrees, X GB", removes those first via git's own plumbing, reports disk reclaimed, then deals with the doubtful ones, and ends with a CLEAN or STOP banner. For a single just-merged PR use pd:merged instead.
+description: Sweep every git worktree and stale local branch in a repo, or every repo under a folder, and safely remove the dead ones.
+when_to_use: Use on /cleanup, "clean up worktrees", "prune worktrees", "delete merged branches", or when the disk is full. For the one PR that just merged, use pd:merged instead.
 ---
 
 # Cleanup — Sweep Every Dead Worktree

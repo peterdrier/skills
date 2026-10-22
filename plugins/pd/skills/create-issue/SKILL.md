@@ -1,8 +1,8 @@
 ---
 name: create-issue
-description: Draft and submit a well-structured GitHub issue. Use when the user says "create an issue", "file an issue", "open an issue", "/create-issue", or describes a bug or feature that should be tracked on GitHub.
+description: Draft and submit a well-structured GitHub issue.
+when_to_use: Use on /create-issue, "create an issue", "file an issue", "open an issue", or when the user describes a bug or feature that should be tracked on GitHub.
 argument-hint: "[owner/repo] description of the issue"
-disable-model-invocation: false
 allowed-tools: Bash(gh repo view *), Bash(gh api *), Bash(gh issue list *), Bash(gh issue create *), Bash(gh label list *), Bash(rm /tmp/*), Read, Write, Edit(**/todos.md), WebFetch, Glob, Grep
 ---
 

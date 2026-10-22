@@ -1,6 +1,7 @@
 ---
 name: finish
-description: End-of-session cleanup for coding and project work. Use when the user says "finish", "wrap up", "done for now", or any variation of ending a work session. Technical/project cleanup only — NOT life review (that's the evening routine).
+description: 'End-of-session cleanup for coding and project work: git hygiene, context capture, loose ends.'
+when_to_use: Use on "finish", "wrap up", "done for now", or any variation of ending a work session. Not a life or day review.
 ---
 
 # Finish — Session Closer
