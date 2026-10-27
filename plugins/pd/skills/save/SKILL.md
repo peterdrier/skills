@@ -22,7 +22,7 @@ The session continues after compaction. You are writing for **yourself, a few mi
 
 ### 1. Quick state check
 
-Run as separate Bash calls, not chained: `git status -s`, `git diff --stat`, `git log --oneline -5`. Check TaskList for open items if it exists. Note any background agents or tasks this session started that have not reported back.
+Run as separate Bash calls, not chained: `git status -sb`, `git diff --stat`, `git log --oneline -5`. Check TaskList for open items if it exists. Note any background agents or tasks this session started that have not reported back.
 
 That is the whole investigation. Everything else comes from the conversation.
 
