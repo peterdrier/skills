@@ -71,6 +71,8 @@ compatibility and presentation. See the [plugin packaging documentation](https:/
 - `/pd:cleanup` — sweep every worktree and stale local branch in a repo: one survey, one
   table, one bulk question, safe removal, CLEAN/STOP banner
 - `/pd:cls` — context-preserving clear: generates a continuation prompt before `/clear`
+- `/pd:save` — pre-compaction checkpoint: writes in-progress work, loose threads, decisions and
+  corrections to memory and a checkpoint file, then hands back the `/compact` command to run
 
 ### Install
 
