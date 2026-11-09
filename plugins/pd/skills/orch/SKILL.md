@@ -1,7 +1,7 @@
 ---
 name: orch
 description: Orchestrate multi-part work by delegating nearly all of it to cheaper subagents, with a model and effort tier chosen per task, so the main context never compacts.
-when_to_use: Use on /orch, "orchestrate", "fan this out", "farm this out", "use subagents for this", or any job with several separable parts. Not for PR tending (pd:steward).
+when_to_use: Use on /orch, "orchestrate", "fan this out", "farm this out", "use subagents for this", or any job with several separable parts. Not for PR tending.
 ---
 
 # orch
@@ -43,11 +43,10 @@ recover from.
 4. **Verify** claims (tests pass, bug gone) with a separate haiku-medium worker in a clean context
    that runs the check and returns pass/fail plus failing names (not haiku-low: it skips checks).
    Workers grading themselves echo what they expected to see.
-5. **Report** to the user one line per task. Don't relay worker reports.
-6. **Hand off.** Once the PR is pushed and ready for review, load the `pd:steward` skill and
-   do its hand-off: spawn a fresh steward session, wait for it to confirm its subscription,
-   unsubscribe, report the PR and steward in one line, and stop. Never tend the PR from this
-   context: every wake re-reads all of it.
+5. **Report** to the user one line per task, plus the PR URL if one was pushed. Don't relay
+   worker reports. Then stop. Do not tend the PR from this context (every wake re-reads all
+   of it), and do not hand it to another process: the user decides what happens to the PR
+   next.
 
 ## Briefs
 

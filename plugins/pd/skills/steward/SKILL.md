@@ -1,7 +1,7 @@
 ---
 name: steward
 description: 'Tend a pushed PR after ready-for-review: a thin steward session classifies each CI or review wake and dispatches one round worker, never doing the work itself.'
-when_to_use: Use only at hand-off time (the last step of /pd:orch) or when this session is briefed as a PR's steward. Needs the Claude Code Remote tools.
+when_to_use: Only when the user invokes /pd:steward themselves, or when this session is briefed as a PR's steward. Never load it on your own or from another skill. Needs the Claude Code Remote tools.
 ---
 
 # steward
@@ -38,7 +38,9 @@ So three rules:
 
 ## Hand-off (the builder's last act)
 
-When the deliverable is pushed and the PR is ready for review:
+Only the user starts this: the builder never hands off on its own, and no other skill
+invokes this one. When the user has asked for it and the deliverable is pushed and the PR
+is ready for review:
 
 1. Spawn the steward with `create_session` (Claude Code Remote tools):
    - `model`: the current sonnet (e.g. `claude-sonnet-5`): classify-and-dispatch needs no
