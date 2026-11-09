@@ -67,7 +67,7 @@ compatibility and presentation. See the [plugin packaging documentation](https:/
   and body conventions in `.claude/create-issue.md`
 - `/pd:context-cleanup` — audit and restructure a project's CLAUDE.md, `.claude/`, memory
   and skills for efficient context use
-- `/pd:finish` — end-of-session cleanup (git hygiene, context capture, loose ends)
+- `/pd:finish` — safe-to-close check: replies `done.` or lists only what blocks closing
 - `/pd:merged` — post-merge git worktree cleanup with a CLEAN/STOP verdict banner
 - `/pd:cleanup` — sweep every worktree and stale local branch in a repo: one survey, one
   table, one bulk question, safe removal, CLEAN/STOP banner
