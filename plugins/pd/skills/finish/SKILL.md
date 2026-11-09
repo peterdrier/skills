@@ -11,7 +11,25 @@ The user is about to close this session. The only question is: **is there any re
 ## Output Contract
 
 - Nothing blocks closing: the entire reply is `done.` Nothing before it, nothing after it.
-- Something blocks closing: list only the blockers, one line each, with what's needed to clear it. Nothing else.
+- Something blocks closing: list only the blockers. Nothing else.
+
+## How to Write a Blocker
+
+The user has hundreds of sessions open and is deciding which to close. They have not read this one and will not scroll back. Each blocker must be fully understandable from the reply alone.
+
+For each blocker, say in plain words:
+
+- What it is: which repo, branch, file, or PR, by full name or full URL
+- Why it matters: what is lost or left hanging if the session closes now
+- Exactly what you need from the user to clear it, as a decision or action they can take on the spot
+
+Never use:
+
+- Ticket IDs, codes, labels, or shorthand without spelling out what they are (not "PD-73", not "option B", not "the second approach")
+- References to earlier in the session ("as discussed", "the issue from before", "that PR", "the thing you mentioned")
+- Abbreviations or mnemonics you coined during the session
+
+If a blocker needs a decision, state the choices and what each one does. A blocker can take a few sentences; completeness beats brevity here. Brevity applies only to what isn't a blocker.
 
 Never include, in either case:
 
