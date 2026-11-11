@@ -13,42 +13,64 @@ usually the most expensive model there is. So every spawn names its tier.
 | haiku | Bounded, well-specified work where a miss is cheap to catch: scouting ("where is X", inventories), lookups, renames and known-pattern edits across files, run-a-command-and-classify, verification runs, small single-file fixes with a check. Weak at long agentic coding — Terminal-Bench 39% vs sonnet's 71% (launch, 2026-10) — so not for multi-file features or debugging without a repro. |
 | sonnet | Most real work: multi-file features and fixes, tests, debugging with a clear repro, docs, research |
 | opus | Judgment where a wrong call is expensive: design, deletion decisions, security, subtle root-cause, adversarial review |
-| fable | Rare. One hard, self-contained question where extra thought changes the answer and opus-high fell short or plainly would. Hand it a distilled input — a findings file or the specific excerpt, never "go read the repo" — because every token it reads is billed at the top rate. It returns an answer, not a build. |
+| fable | Rare. One hard, self-contained question where extra thought changes the answer and opus-high fell short or plainly would. Hand it a distilled input (a findings file or the specific excerpt, never "go read the repo") because every token it reads is billed at the top rate. It returns an answer, not a build. |
 
 | Effort | Use for |
 |--------|---------|
 | low | The brief already says exactly what to do; the worker only executes |
-| medium | Default — the worker has to work out how |
-| high | Ambiguous, subtle, or a review where a miss is costly |
+| medium | Default: the worker has to work out how |
+| high | Ambiguous, subtle, or a review where a miss is costly. **The ceiling.** |
 
-Effort is the same knob on every model (all four take `low`–`max`; the agents here pin `low`,
-`medium`, `high`), but the levels aren't equivalent across models — haiku-high is still haiku.
-Per-model notes:
+**Never above `high`.** Every model takes `xhigh` and `max`, and Claude Code's own default is
+`xhigh`, but nothing here uses them: not workers, not the orchestrating session itself (set it
+with `/effort high` or lower before a run). The gains above `high` are uneven and the tokens are
+not, so a task that `high` can't do escalates to the next *model* at `high`, never to a higher
+effort on the same one. If a spawn would inherit `xhigh`/`max`, name the effort explicitly.
+
+The levels aren't equivalent across models (haiku-high is still haiku). Per-model notes:
 
 - **haiku** (Haiku 5.5, 2026-10). `low` is the cheapest tier there is, but Anthropic's own
   testing says that in long agent prompts it skips a search, stops early and hands the task back,
-  or reports a code change done without running the check — so `low` is for one-step, no-check
+  or reports a code change done without running the check, so `low` is for one-step, no-check
   jobs (lookups, classify, apply-this-exact-edit). `medium` roughly halves the early stopping and
   is the floor for anything with a check in it, including verification runs. `high` for strict
-  instruction following and longer haiku tasks. Above that, use sonnet instead — Anthropic's own
-  guidance at haiku xhigh/max is to benchmark against Sonnet 5.5, and at launch sonnet-xhigh beat
-  haiku-max on coding.
+  instruction following and longer haiku tasks. Past haiku-high, move to sonnet.
 - **sonnet** (Sonnet 5.5). `medium` for well-specified agentic work, `high` for harder or longer
-  tasks. Its `medium` is a real step down from `high` — recalibrated from Sonnet 5.
-- **opus** (Opus 5.5). API default is `medium`; `high` for the judgment calls it's routed here for.
-- **fable** (Fable 5.1). `high` only, by design.
+  tasks. Its `medium` is a real step down from `high` (recalibrated from Sonnet 5).
+- **opus** (Opus 5.5). API default is `medium` (one below the old Opus 5 default), so the agents
+  pin it explicitly. `high` for the judgment calls it's routed here for.
+- **fable** (Fable 5.2, 2026-11). `high` only, by design. Anthropic's own guidance for 5.2 is to
+  start at `high` because gains above it are uneven, which is also this file's ceiling. Effort
+  barely changes its reply length; ask for a short answer in the brief.
+
+## Price per model
+
+API list prices, $/MTok (checked 2026-11-11; `/spend` carries the same table):
+
+| Model | Input | Output | Cache read | vs sonnet |
+|-------|-------|--------|------------|-----------|
+| haiku (Haiku 5.5, prompt ≤100k) | 0.10 | 0.50 | 0.01 | 1/20 |
+| haiku (Haiku 5.5, prompt >100k) | 0.50 | 2.50 | 0.05 | 1/4 |
+| sonnet (Sonnet 5.5) | 2 | 10 | 0.10 | 1× |
+| opus (Opus 5.5) | 4 | 20 | 0.20 | 2× |
+| fable (Fable 5.2) | 8 | 40 | 0.20 | 4× |
+
+Fable 5.2 is cheaper than 5.1 ($10/$50) but still twice opus, and it thinks longer per turn,
+so the per-task gap is wider than the rate gap. Cache reads cost the same as opus, which makes a
+long-lived fable *orchestrator* cheaper to wake than it used to be; that does not make fable
+*workers* cheap, because a worker's cost is mostly fresh input and output.
 
 Default is `sonnet-medium`. Start at the lowest tier that plausibly works; on failure escalate one
-step — effort first, then model — handing over what the failed attempt learned. Wrong-low costs
-one cheap retry; wrong-high is paid on every task.
+step — effort first, up to `high`, then the next model — handing over what the failed attempt
+learned. Wrong-low costs one cheap retry; wrong-high is paid on every task.
 
 Every spawn pays a fixed overhead — system prompt, tool schemas, the CLAUDE.md chain — before it
 reads the brief: measured at 40–60k tokens (2026-09, a large .NET monorepo), roughly $0.005 on
-haiku, $0.10–0.15 on sonnet, $0.50+ on fable. Every worker completion also wakes the
-orchestrator, which re-reads its whole context at its own rate (about $0.12 a wake at 120k
-context on fable). So prefer a few fat workers to many thin ones, batch small related tasks into
-one worker, and don't spawn for anything smaller than the overhead. `/spend` shows a run's real
-numbers.
+haiku, $0.10–0.15 on sonnet, $0.20–0.30 on opus, $0.40–0.60 on fable. Every worker completion
+also wakes the orchestrator, which re-reads its whole context at its own rate (on Fable 5.2 at
+120k context, about $0.03 in cache reads per wake before any new tokens). So prefer a few fat
+workers to many thin ones, batch small related tasks into one worker, and don't spawn for
+anything smaller than the overhead. `/spend` shows a run's real numbers.
 
 Haiku has a price cliff: once a request's prompt passes 100k tokens, every token in it bills at
 5× (input $0.10 → $0.50/MTok, output $0.50 → $2.50). The fixed overhead already uses half that

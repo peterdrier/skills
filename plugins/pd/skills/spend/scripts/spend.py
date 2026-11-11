@@ -32,9 +32,12 @@ from pathlib import Path
 
 # $/MTok: fresh input, output, cache write, cache read (API list prices).
 # Re-check against https://www.anthropic.com/pricing if these look stale.
-AS_OF = "2026-10-07"
+AS_OF = "2026-11-11"
 RATES = {
-    "fable-5-1": (10, 50, 12.50, 0.25),  # must precede plain "fable"
+    "fable-5-2": (8, 40, 10.00, 0.20),  # must precede plain "fable"
+    "mythos-5-2": (8, 40, 10.00, 0.20),  # must precede plain "mythos"
+    "fable-5-1": (10, 50, 12.50, 0.25),
+    "mythos-5-1": (10, 50, 12.50, 0.25),
     "fable": (10, 50, 12.50, 1.00),
     "mythos": (10, 50, 12.50, 1.00),
     "opus-5-5": (4, 20, 5.00, 0.20),  # must precede plain "opus"
