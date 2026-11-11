@@ -55,7 +55,8 @@ compatibility and presentation. See the [plugin packaging documentation](https:/
 
 - `/pd:orch` — orchestrate multi-part work by delegating to cheaper subagents with an
   explicit model/effort tier per task; ships the `orch-*` worker agents (haiku, sonnet and
-  opus at low/medium/high, fable-high) and the routing rule other skills point to
+  opus at low/medium/high, fable-high; never above high effort) and the routing rule other
+  skills point to
 - `/pd:steward` — tending a PR after ready-for-review, only when you invoke it: hands the
   PR to a thin steward session that classifies each event and dispatches one round worker,
   under a five-round review ceiling; a project adds its verification gate and triage rules
