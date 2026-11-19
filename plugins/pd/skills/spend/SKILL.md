@@ -27,8 +27,13 @@ it for a plain "what did that cost" lookup.
 Show the printed markdown table verbatim. Then add up to three lines of
 observations, e.g.:
 - orchestrator share vs. the cheapest way this could have gone
-- the priciest agent, and whether its tier matches its actual cost
-- anything shown as `untagged` (no tier suffix) or under "unpriced models"
+- the priciest agent, and whether its model and effort match what the task needed
+- any Effort marked `*` (agent type names no tier, so it inherited the session's effort)
+  or anything under "unpriced models"
+
+Columns: Agent is the title the spawn was given, Type is the agent type, and Model and
+Effort are read from the requests themselves, so they show what actually ran, not what
+was asked for.
 
 Never open a transcript file directly (`Read`, `cat`, grep-and-page-through) to
 answer a cost question — they can be tens of megabytes per session and dwarf any

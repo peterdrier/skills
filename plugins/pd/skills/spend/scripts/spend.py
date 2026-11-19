@@ -96,7 +96,7 @@ def usage_records(path):
         msg = j.get("message") or {}
         u = msg.get("usage")
         if u:
-            yield j.get("requestId"), j.get("timestamp"), msg.get("model"), u
+            yield j.get("requestId"), j.get("timestamp"), msg.get("model"), u, j.get("effort")
 
 
 def turn_count(path):
@@ -118,10 +118,10 @@ def turn_count(path):
 
 
 def dedup_last(records):
-    """requestId -> (timestamp, model, usage), LAST record per id wins (streaming updates)."""
+    """requestId -> (timestamp, model, usage, effort), LAST record per id wins (streaming updates)."""
     by_id = {}
-    for i, (rid, t, model, u) in enumerate(records):
-        by_id[rid if rid is not None else f"_norid_{i}"] = (t, model, u)
+    for i, (rid, t, model, u, effort) in enumerate(records):
+        by_id[rid if rid is not None else f"_norid_{i}"] = (t, model, u, effort)
     return by_id
 
 
@@ -129,7 +129,7 @@ def usage_stats(by_id):
     """-> (model -> {in,out,cw,cr,usd,requests,priced}, first_ts, last_ts)."""
     by_model = {}
     first = last = None
-    for t, model, u in by_id.values():
+    for t, model, u, _effort in by_id.values():
         i = u.get("input_tokens", 0)
         o = u.get("output_tokens", 0)
         cw = u.get("cache_creation_input_tokens", 0)
@@ -154,11 +154,15 @@ def usage_stats(by_id):
     return by_model, first, last
 
 
-def tier_of(name):
-    m = TIER_RE.search(name or "")
-    if not m:
-        return "untagged"
-    return f"{m.group(1)}-{m.group(3)}" if m.group(3) else m.group(1)
+def pins_tier(agent_type):
+    """True when the agent type's name carries a model tier (e.g. `pd:orch-haiku-low`)."""
+    return bool(TIER_RE.search(agent_type or ""))
+
+
+def efforts_of(by_id):
+    """Effort levels the requests actually ran at, as recorded per request by Claude Code."""
+    seen = sorted({e for _t, _m, _u, e in by_id.values() if e})
+    return "+".join(seen) if seen else "?"  # "?": transcript predates effort recording
 
 
 def find_agent_files(transcript_path):
@@ -166,22 +170,36 @@ def find_agent_files(transcript_path):
     return sorted(glob.glob(os.path.join(base, "subagents", "*.jsonl")))
 
 
-def agent_label(path):
+def agent_info(path):
+    """-> (title, agent_type) for a subagent transcript.
+
+    The sidecar `<agent>.meta.json` holds the spawn's `description` (the title the
+    orchestrator gave it) and `agentType`. Either can be missing (older Claude Code,
+    named teammates), so the title falls back to the meta `name`, then the filename.
+    """
+    meta = {}
     meta_path = path[: -len(".jsonl")] + ".meta.json"
     if os.path.isfile(meta_path):
         try:
-            name = json.load(open(meta_path, encoding="utf-8")).get("name")
-            if name:
-                return name
+            meta = json.load(open(meta_path, encoding="utf-8")) or {}
         except (ValueError, OSError):
             pass
     fname = os.path.basename(path)
-    if fname.startswith("agent-a"):  # named teammate: agent-a<name>-<16-hex-hash>.jsonl
-        stem = fname[len("agent-a") : -len(".jsonl")]
-        return re.sub(r"-[0-9a-f]{16}$", "", stem)
-    if fname.startswith("agent-"):
-        return fname[len("agent-") : -len(".jsonl")]
-    return fname
+    stem = fname[: -len(".jsonl")]
+    if fname.startswith("agent-a") and not re.fullmatch(r"agent-a[0-9a-f]{16}", stem):
+        # named teammate: agent-a<name>-<16-hex-hash>.jsonl
+        fallback = re.sub(r"-[0-9a-f]{16}$", "", stem[len("agent-a") :])
+    elif fname.startswith("agent-"):
+        fallback = stem[len("agent-") :]
+    else:
+        fallback = fname
+    title = meta.get("description") or meta.get("name") or fallback
+    return title, meta.get("agentType") or meta.get("name") or "-"
+
+
+def cell(text):
+    """Make free text safe inside a markdown table cell."""
+    return str(text).replace("|", "\\|").replace("\n", " ").strip()
 
 
 def short_ts(t):
@@ -204,7 +222,7 @@ def duration_str(first, last):
     return f"{s}s"
 
 
-def build_row(label, tier, by_id, turns):
+def build_row(label, agent_type, by_id, turns):
     by_model, first, last = usage_stats(by_id)
     tok = {"in": 0, "out": 0, "cw": 0, "cr": 0}
     usd = 0.0
@@ -217,7 +235,8 @@ def build_row(label, tier, by_id, turns):
             unpriced.add(model)
     return {
         "label": label,
-        "tier": tier,
+        "type": agent_type,
+        "effort": efforts_of(by_id),
         "models": by_model,
         "turns": turns,
         "requests": len(by_id),
@@ -255,34 +274,37 @@ def main():
 
     main_by_id = dedup_last(usage_records(transcript))
     rows = [build_row("main (orchestrator)", "-", main_by_id, turn_count(transcript))]
+    session_effort = rows[0]["effort"]
     for p in find_agent_files(transcript):
         by_id = dedup_last(usage_records(p))
         if not by_id:
             continue
-        label = agent_label(p)
-        rows.append(build_row(label, tier_of(label), by_id, turn_count(p)))
+        label, agent_type = agent_info(p)
+        rows.append(build_row(label, agent_type, by_id, turn_count(p)))
 
     ordered = [rows[0]] + sorted(rows[1:], key=lambda r: r["first"] or "")
 
     print(f"# Spend report: {session_id}\n")
-    print("| Agent | Tier | Model | Turns | Reqs | In | Out | Cache W | Cache R | Est $ | First-Last (dur) |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| Agent | Type | Model | Effort | Turns | Reqs | In | Out | Cache W | Cache R | Est $ | Start | Dur |")
+    print("|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|---:|")
     total_tok = {"in": 0, "out": 0, "cw": 0, "cr": 0}
     total_usd = 0.0
     all_unpriced = set()
     model_rollup = {}
     orch_usd = ordered[0]["usd"]
+    inherited = []
     for r in ordered:
-        models = "+".join(sorted(r["models"])) or "?"
-        span = (
-            f"{short_ts(r['first'])}-{short_ts(r['last'])} ({duration_str(r['first'], r['last'])})"
-            if r["first"]
-            else "-"
-        )
+        models = "+".join(m.removeprefix("claude-") for m in sorted(r["models"])) or "?"
+        effort = r["effort"]
+        if r is not ordered[0] and not pins_tier(r["type"]):
+            effort += "*"
+            inherited.append(r)
+        start = short_ts(r["first"]) if r["first"] else "-"
         t = r["tok"]
         print(
-            f"| {r['label']} | {r['tier']} | {models} | {r['turns']} | {r['requests']} | {t['in']:,} | {t['out']:,} "
-            f"| {t['cw']:,} | {t['cr']:,} | ${r['usd']:.2f} | {span} |"
+            f"| {cell(r['label'])} | {cell(r['type'])} | {models} | {effort} | {r['turns']} | {r['requests']} "
+            f"| {t['in']:,} | {t['out']:,} | {t['cw']:,} | {t['cr']:,} | ${r['usd']:.2f} "
+            f"| {start} | {duration_str(r['first'], r['last'])} |"
         )
         for k in total_tok:
             total_tok[k] += t[k]
@@ -290,11 +312,17 @@ def main():
         all_unpriced |= r["unpriced"]
         merge_model_rollup(model_rollup, r["models"])
     print(
-        f"| **TOTAL** | | | {sum(r['turns'] for r in ordered)} | {sum(r['requests'] for r in ordered)} | {total_tok['in']:,} | {total_tok['out']:,} "
-        f"| {total_tok['cw']:,} | {total_tok['cr']:,} | **${total_usd:.2f}** | |"
+        f"| **TOTAL** | | | | {sum(r['turns'] for r in ordered)} | {sum(r['requests'] for r in ordered)} | {total_tok['in']:,} | {total_tok['out']:,} "
+        f"| {total_tok['cw']:,} | {total_tok['cr']:,} | **${total_usd:.2f}** | | |"
     )
     print()
-    print(f"estimated, API list prices as of {AS_OF}")
+    print(f"estimated, API list prices as of {AS_OF}; Start is UTC; Effort is what each request actually ran at")
+    if inherited:
+        print()
+        print(
+            f"\\* {len(inherited)} agent(s) whose type names no tier: nothing pinned their effort, so they "
+            f"most likely inherited the session's ({session_effort}). Spawn a tiered agent type to pin it."
+        )
     print()
     print("By model:")
     for model, b in sorted(model_rollup.items(), key=lambda kv: -kv[1]["usd"]):
@@ -315,7 +343,8 @@ def main():
             "agents": [
                 {
                     "label": r["label"],
-                    "tier": r["tier"],
+                    "type": r["type"],
+                    "effort": r["effort"],
                     "models": sorted(r["models"]),
                     "turns": r["turns"],
                     "requests": r["requests"],
